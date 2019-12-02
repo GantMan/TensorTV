@@ -1,2 +1,0 @@
-# TensorTV
-Created with CodeSandbox
