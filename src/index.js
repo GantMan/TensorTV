@@ -13,8 +13,17 @@ tf.browser.toPixels(blankScreen, blankScreenCanvas);
 // getImage(1) should return a black and white static image
 // getImage(3) should return a random color static image
 
-// YOUR CODE GOES HERE
-function getImage() {}
+// ANSWER
+let backImage = blankScreen;
+const img = new Image();
+img.crossOrigin = "anonymous";
+
+function getImage(channels) {
+  return tf
+    .randomUniform([250, 350, channels], 0, 255, "int32")
+    .add(backImage)
+    .div(512);
+}
 
 // END OF YOUR CODE
 // Feel free to look at the rest to see how this works,
@@ -63,28 +72,46 @@ function animatetvStatic() {
 }
 
 // this changes the array of canvas elements to be all black and white static
-bwButton.onclick = function() {
-  // prevent memory leaks!
-  tensorArr.forEach(t => t.dispose());
-  // load images with 1 channel, aka black and white
-  loadImages(1);
+bwButton.onclick = function () {
+  // some image here
+  img.src = "/ganticorn.png";
+  img.onload = (result) => {
+    backImage = tf.image.resizeBilinear(
+      tf.browser.fromPixels(img, 1),
+      [250, 350],
+      true
+    );
+    // prevent memory leaks!
+    tf.dispose(tensorArr);
+    loadImages(1);
+  };
 };
 
 // this changes the array of canvas elements to be all color static
-rgbButton.onclick = function() {
-  // prevent memory leaks!
-  tensorArr.forEach(t => t.dispose());
-  // load images with 3 channel, aka full color static!
-  loadImages(3);
-};
+function doColor() {
+  // some image here
+  img.src = "/ganticorn.png";
+  img.onload = () => {
+    backImage = tf.image.resizeBilinear(
+      tf.browser.fromPixels(img),
+      [250, 350],
+      true
+    );
+    // prevent memory leaks!
+    tf.dispose(tensorArr);
+    loadImages(3);
+  };
+}
+
+rgbButton.onclick = doColor;
 
 // toggles a boolean that our animation function uses to decide
 // whether or not to display canvas elements
-powerButton.onclick = function() {
+powerButton.onclick = function () {
   tvPower = !tvPower;
   powerButton.textContent = tvPower ? "Off" : "On";
 };
 
-// kicks things off with color static!
 loadImages(3);
+doColor();
 animatetvStatic();
